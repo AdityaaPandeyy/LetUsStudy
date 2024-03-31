@@ -9,7 +9,7 @@ TeacherRouter.post("/register", async (req, res) => {
   const { email, password } = req.body;
   const user = await TeacherSchema.findOne({ email: req.body.email });
   if (user) {
-    return res.redirect("/login");
+    return res.json({ message: "Teacher Already Exists" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -17,14 +17,14 @@ TeacherRouter.post("/register", async (req, res) => {
     email: email,
     password: hashedPassword,
   });
-  res.json("teacher created successfully");
+  res.json({ message: "Teacher Created Successfully" });
 });
 
 TeacherRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await TeacherSchema.findOne({ email: req.body.email });
   if (!user) {
-    return res.redirect("/register");
+    return res.json({ message: "Teacher Doesn't Exist" });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -36,17 +36,17 @@ TeacherRouter.post("/login", async (req, res) => {
   res.json({ token: token, userID: user._id });
 });
 
-TeacherRouter.get("/all", async(req,res) => {
+TeacherRouter.get("/all", async (req, res) => {
   const teachers = await TeacherSchema.find({});
   return res.json(teachers);
 });
 
-TeacherRouter.get("/:teacherID", async(req,res) => {
+TeacherRouter.get("/:teacherID", async (req, res) => {
   const teacher = await TeacherSchema.findById(req.params.teacherID);
   res.json(teacher);
 });
 
-TeacherRouter.get("/:teacherID/:userID", async (req,res) => {
+TeacherRouter.get("/:teacherID/:userID", async (req, res) => {
   const teacher = await TeacherSchema.findById(req.params.teacherID);
   const user = await UserSchema.findById(req.params.userID);
   teacher.students.push(user);

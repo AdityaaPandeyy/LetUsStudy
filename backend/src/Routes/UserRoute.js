@@ -6,9 +6,10 @@ const UserRouter = express.Router();
 
 UserRouter.post("/register", async (req, res) => {
   const { email, password } = req.body;
+  console.log(req.body);
   const user = await UserSchema.findOne({ email: req.body.email });
   if (user) {
-    return res.redirect("/login");
+    return res.json({ message: "User Already Exists" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -16,14 +17,14 @@ UserRouter.post("/register", async (req, res) => {
     email: email,
     password: hashedPassword,
   });
-  res.redirect("/login");
+  res.json({ message: "User Created Successfully" });
 });
 
 UserRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await UserSchema.findOne({ email: req.body.email });
   if (!user) {
-    return res.redirect("/register");
+    return res.json({ message: "User Doesn't Exist" });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
